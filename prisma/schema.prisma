@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = "mysql://root:1234@localhost:3306/db"
+}
+
+model amphures {
+  id          Int         @id @default(autoincrement())
+  code        String      @db.VarChar(4)
+  name_th     String      @db.VarChar(150)
+  name_en     String      @db.VarChar(150)
+  province_id Int         @default(0)
+  provinces   provinces   @relation(fields: [province_id], references: [id], onUpdate: Restrict, map: "province_id")
+  districts   districts[]
+
+  @@index([province_id], map: "province_id")
+}
+
+model districts {
+  id         Int      @id @default(autoincrement())
+  zip_code   Int
+  name_th    String   @db.VarChar(150)
+  name_en    String   @db.VarChar(150)
+  amphure_id Int      @default(0)
+  amphures   amphures @relation(fields: [amphure_id], references: [id], onDelete: NoAction, onUpdate: NoAction, map: "amphure_id")
+
+  @@index([amphure_id], map: "amphure_id")
+}
+
+model geographies {
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
+}
+
+model provinces {
+  id           Int        @id @default(autoincrement())
+  code         String     @db.VarChar(2)
+  name_th      String     @db.VarChar(150)
+  name_en      String     @db.VarChar(150)
+  geography_id Int        @default(0)
+  amphures     amphures[]
+}
+
+model users {
+  id         Int       @id @default(autoincrement())
+  username   String?   @db.VarChar(255)
+  password   String?   @db.VarChar(255)
+  email      String?   @unique(map: "unique_email") @db.VarChar(255)
+  created_at DateTime? @default(now()) @db.Timestamp(0)
+  updated_at DateTime? @default(now()) @db.Timestamp(0)
+}
+
+model posts {
+  id      Int     @id @default(autoincrement())
+  name    String? @db.VarChar(255)
+  user_id Int
+
+  @@index([user_id], map: "user_id")
+}
